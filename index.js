@@ -1,36 +1,30 @@
 const express = require("express");
 const cors = require("cors");
-const OpenAI = require("openai");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+app.post("/chat", (req, res) => {
+  const userMessage = req.body.message.toLowerCase();
 
-app.post("/chat", async (req, res) => {
-  try {
-    const { message } = req.body;
+  let reply = "I don't understand.";
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "You are a helpful assistant." },
-        { role: "user", content: message },
-      ],
-    });
-
-    res.json({
-      reply: response.choices[0].message.content,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error connecting to AI" });
+  if (userMessage.includes("hello")) {
+    reply = "Hi there 👋";
+  } 
+  else if (userMessage.includes("how are you")) {
+    reply = "I'm good! How can I help you?";
+  } 
+  else if (userMessage.includes("bye")) {
+    reply = "Goodbye! 👋";
   }
+
+  res.json({ reply });
 });
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
