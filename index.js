@@ -1,37 +1,38 @@
 const express = require("express");
 const cors = require("cors");
+const OpenAI = require("openai");
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("Server is running!");
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Chat route
-app.post("/chat", (req, res) => {
-  const userMessage = req.body.message || "";
+app.get("/", (req, res) => {
+  res.send("AI Server is running 🚀");
+});
 
-  let reply = "I don't understand.";
+app.post("/chat", async (req, res) => {
+  try {
+    const { message } = req.body;
 
-  if (userMessage.toLowerCase().includes("hello")) {
-    reply = "Hi there 👋";
-  } 
-  else if (userMessage.toLowerCase().includes("how are you")) {
-    reply = "I'm good! How can I help?";
-  } 
-  else if (userMessage.toLowerCase().includes("bye")) {
-    reply = "Goodbye 👋";
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: message }],
+    });
+
+    res.json({
+      reply: completion.choices[0].message.content,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong" });
   }
-
-  res.json({ reply: reply });
 });
 
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, function () {
+app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
