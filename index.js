@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
@@ -20,7 +21,7 @@ app.post("/chat", (req, res) => {
     reply = "Goodbye! 👋";
   }
 
-  res.json({ reply });
+  res.json({ reply: reply });
 });
 
 const PORT = process.env.PORT || 3000;
