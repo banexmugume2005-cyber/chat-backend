@@ -3,35 +3,91 @@
 <head>
   <title>Chat App</title>
   <style>
-    body { font-family: Arial; }
+    body { 
+      font-family: Arial; 
+      max-width: 600px; 
+      margin: 40px auto; 
+    }
+
     #messages {
       border: 1px solid #ccc;
       padding: 10px;
       height: 300px;
       overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    .user {
+      text-align: right;
+      margin: 5px 0;
+      font-weight: bold;
+    }
+
+    .bot {
+      text-align: left;
+      margin: 5px 0;
+      color: blue;
+    }
+
+    input {
+      width: 75%;
+      padding: 8px;
+    }
+
+    button {
+      padding: 8px 12px;
     }
   </style>
 </head>
 <body>
-  <h2>Simple Chat</h2>
+
+  <h2>Simple AI Chat</h2>
 
   <div id="messages"></div>
 
-  <input id="msgInput" placeholder="Type message..." />
+  <input id="msgInput" placeholder="Type your message..." />
   <button onclick="sendMessage()">Send</button>
 
   <script>
-    function sendMessage() {
+    async function sendMessage() {
       const input = document.getElementById("msgInput");
       const messages = document.getElementById("messages");
+      const message = input.value.trim();
 
-      if (input.value.trim() !== "") {
-        const newMsg = document.createElement("div");
-        newMsg.textContent = input.value;
-        messages.appendChild(newMsg);
-        input.value = "";
+      if (!message) return;
+
+      // Show user message
+      const userMsg = document.createElement("div");
+      userMsg.className = "user";
+      userMsg.textContent = message;
+      messages.appendChild(userMsg);
+
+      input.value = "";
+
+      try {
+        const res = await fetch("https://chat-backend-fotz.onrender.com/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+
+        // Show bot reply
+        const botMsg = document.createElement("div");
+        botMsg.className = "bot";
+        botMsg.textContent = data.reply;
+        messages.appendChild(botMsg);
+
+        messages.scrollTop = messages.scrollHeight;
+
+      } catch (error) {
+        console.error("Error:", error);
       }
     }
   </script>
+
 </body>
 </html>
